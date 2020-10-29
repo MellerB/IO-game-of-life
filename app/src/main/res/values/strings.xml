@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Inzynieria_oprogramowania</string>
+    <string name="reset">reset</string>
+    <string name="start">start</string>
+    <string name="next">next</string>
+    <string name="faster">faster</string>
+    <string name="slower">slower</string>
+    <string name="zoom_in">zoom in</string>
+    <string name="zoom_out">zoom out</string>
+</resources>
