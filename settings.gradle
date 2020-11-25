@@ -1,2 +1,2 @@
-rootProject.name='Inzynieria_oprogramowania'
 include ':app'
+rootProject.name = "CanvasTest"

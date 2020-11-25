@@ -1,4 +1,4 @@
-package com.example.inzynieria_oprogramowania
+package com.example.canvastest
 
 import org.junit.Test
 
