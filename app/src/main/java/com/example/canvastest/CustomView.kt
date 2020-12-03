@@ -15,19 +15,34 @@ import kotlin.math.floor
 
 class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr)
 {
-
+    private lateinit var myMatrix: Matrix
     private lateinit var myBitmap: Bitmap
     private lateinit var myCanvas: Canvas
 
-    private var viewHeight = 2000
-    private var viewWidth = 2000
+    private var borderThickness = 1f
+    private var squareSize = 0f
+    private var startX = 0f
+    private var startY = 0f
+    private var previousDragX = 0f
+    private var previousDragY = 0f
+    private var tmpX = 0f
+    private var tmpY = 0F
 
-    private var startX = 0f;
-    private var startY = 0f;
-    private var previousDragX = 0f;
-    private var previousDragY = 0f;
-    private var tmpX = 0F;
-    private var tmpY = 0F;
+    private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = borderThickness
+        setColor(Color.CYAN)
+    }
+
+    private val squarePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        setColor(Color.RED)
+    }
+
+    private val squarePaintBlank = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        setColor(Color.GRAY)
+    }
 
     private val myListener =  object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean {
@@ -35,8 +50,20 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
             startY = e.getY() - previousDragY
             return true
         }
+
+        override fun onSingleTapUp(e: MotionEvent?): Boolean {
+            val column = e?.getX()?.minus(previousDragX)?.div(squareSize)?.toInt()
+            val row = e?.getY()?.div(squareSize)?.toInt()
+
+            if (column != null && row != null) {
+                myMatrix.changeBoolean(row, column)
+                colorSquare(row, column)
+            }
+            return super.onSingleTapConfirmed(e)
+        }
     }
     private val detector: GestureDetector = GestureDetector(context, myListener)
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return detector.onTouchEvent(event).let { result ->
             if (!result) {
@@ -44,66 +71,81 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
                     MotionEvent.ACTION_MOVE -> {
                         tmpX = event.getX() - startX
                         tmpY = event.getY() - startY
-                        if((tmpX * -1) < 0)
-                        {
-                            tmpX = 0f
-                        }
-                        else if((tmpX * -1) > viewWidth - width)
-                        {
-                            tmpX = (viewWidth - width) * -1f
-                        }
-                        if((tmpY * -1) < 0)
-                        {
-                            tmpY = 0f
-                        }
-                        else if((tmpY * -1) > viewHeight - height)
-                        {
-                            tmpY = (viewHeight - height) * -1f
-                        }
-                        scrollTo(-tmpX.toInt(), -tmpY.toInt())
+                        checkEdges()
                         true
                     }
                     MotionEvent.ACTION_UP -> {
                         previousDragX = tmpX
                         previousDragY = tmpY
-
                         true
                     }
-
                     else -> false
                 }
             } else true
         }
     }
 
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-        setColor(Color.CYAN)
+    private fun checkEdges()
+    {
+        if((tmpX * -1) < 0)
+        {
+            tmpX = 0f
+        }
+        else if((tmpX * -1) > height - width)
+        {
+            tmpX = (height - width) * -1f
+        }
+
+        if((tmpY * -1) < 0)
+        {
+            tmpY = 0f
+        }
+        else if((tmpY * -1) > height - height)
+        {
+            tmpY = (height - height) * -1f
+        }
+        scrollTo(-tmpX.toInt(), -tmpY.toInt())
     }
 
-    private val paint2 = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-        setColor(Color.GREEN)
+    private fun colorSquare( row: Int, column: Int)
+    {
+        if(myMatrix.matrix[row][column])
+        {
+            myCanvas.drawRect(column * squareSize + borderThickness, row * squareSize + borderThickness, column * squareSize + squareSize - borderThickness, row * squareSize + squareSize - borderThickness, squarePaint)
+        }
+        else
+        {
+            myCanvas.drawRect(column * squareSize + borderThickness, row * squareSize + borderThickness, column * squareSize + squareSize - borderThickness, row * squareSize + squareSize - borderThickness, squarePaintBlank)
+        }
+        invalidate()
     }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
         if (::myBitmap.isInitialized) myBitmap.recycle()
-        myBitmap = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_8888)
+        myMatrix = Matrix(10)
+        myBitmap = Bitmap.createBitmap(height, height, Bitmap.Config.ARGB_8888)
         myCanvas = Canvas(myBitmap)
-        myCanvas.drawColor(Color.RED)
-
+        myCanvas.drawColor(Color.GRAY)
+        squareSize = (height/myMatrix.count).toFloat()
+        for(j in 1 until myMatrix.count)
+        {
+            myCanvas.drawLine(squareSize * j,0f,squareSize * j, height.toFloat(), gridPaint)
+        }
+        for(j in 1 until myMatrix.count)
+        {
+            myCanvas.drawLine(0f,squareSize * j, height.toFloat(),squareSize * j, gridPaint)
+        }
+        scrollTo((height - width)/2 ,0)
+        previousDragX = -(height - width)/2f
+        startX = (height - width)/2f
+        tmpX = -startX
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         canvas?.save()
-
-
-
-        canvas?.drawBitmap(myBitmap, 0f, 0f, null)
-        canvas?.drawRect(0F,0F,700F,700F, paint)
-        canvas?.drawRect(701F,701F,1300F,1200F, paint2)
+        canvas?.drawBitmap(myBitmap, 0f,0f, null)
         canvas?.restore()
     }
 }
