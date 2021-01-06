@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.os.Build
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -11,13 +12,15 @@ import android.view.MotionEvent.ACTION_CANCEL
 import android.view.MotionEvent.INVALID_POINTER_ID
 import android.view.ScaleGestureDetector
 import android.view.View
+import android.widget.Button
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.createBitmap
 
 
 private const val mActivePointerId = INVALID_POINTER_ID
 class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr)
 {
-    private lateinit var myMatrix: Matrix
+    lateinit var myMatrix: Matrix
     private lateinit var myBitmap: Bitmap
     private lateinit var myCanvas: Canvas
 
@@ -70,6 +73,7 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
             return true
         }
 
+        @RequiresApi(Build.VERSION_CODES.N)
         override fun onSingleTapUp(e: MotionEvent?): Boolean {
             //funkcja zmieniajaca boolean w Matrix oraz rysujaca wynik zmiany na ekran
             val column = e?.getX()?.minus(viewX)?.div(squareSize*myScaleFactor)?.toInt()
@@ -77,7 +81,7 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
 
             if (column != null && row != null) {
                 myMatrix.changeBoolean(row, column)
-                colorSquare(row, column)
+                drawMatrix()
             }
             return super.onSingleTapUp(e)
         }
@@ -230,8 +234,22 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
         {
             myCanvas.drawRect(column * squareSize + borderThickness, row * squareSize + borderThickness, column * squareSize + squareSize - borderThickness, row * squareSize + squareSize - borderThickness, squarePaintBlank)
         }
+
+    }
+
+    private fun drawMatrix()
+    {
+        for( i in 0..myMatrix.count-1)
+        {
+            for( j in 0..myMatrix.count-1)
+            {
+                colorSquare(i,j)
+            }
+        }
+
         invalidate()
     }
+
 
     //metoda wywolywana podczas zmiany rozmiaru ekranu telefonu, czyli tylko podczas odpalenia programu
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
@@ -239,7 +257,7 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
         if (::myBitmap.isInitialized) myBitmap.recycle()
         //ustalenie parametrow poczatkowych
         matrixSize = height
-        myMatrix = Matrix(20)
+        //myMatrix = Matrix(20)
         myBitmap = createBitmap(matrixSize, matrixSize, Bitmap.Config.ARGB_8888)
         myCanvas = Canvas(myBitmap)
         myCanvas.drawColor(Color.GRAY)
@@ -271,5 +289,12 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
         }
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun update()
+    {
+        drawMatrix()
+        invalidate()
+    }
 
 }
