@@ -24,10 +24,11 @@ data class Matrix ( val _count: Int )
     val count = _count;
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun changeBoolean(row: Int, column: Int )
+    fun changeBoolean(row: Int, column: Int ) :Boolean
     {
         matrix[row][column] = !matrix[row][column]
         Log.d("Neighbours: ",getNeighboursNumber(row,column).toString());
+        return matrix[row][column];
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
