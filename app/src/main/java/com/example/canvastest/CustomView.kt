@@ -60,7 +60,7 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
     }
     private val squarePaintBlank = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        setColor(Color.GRAY)
+        setColor(Color.argb(255,32,32,32))
     }
 
     private val myListener =  object : GestureDetector.SimpleOnGestureListener() {
@@ -260,7 +260,7 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
         //myMatrix = Matrix(20)
         myBitmap = createBitmap(matrixSize, matrixSize, Bitmap.Config.ARGB_8888)
         myCanvas = Canvas(myBitmap)
-        myCanvas.drawColor(Color.GRAY)
+        myCanvas.drawColor(Color.argb(255,32,32,32))
         squareSize = (matrixSize / myMatrix.count + borderThickness / 2)
 
         //rysowanie grida

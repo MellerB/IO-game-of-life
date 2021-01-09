@@ -15,8 +15,8 @@ import com.google.android.material.internal.ContextUtils.getActivity
 
 class MainActivity : AppCompatActivity() {
 
-    val matrix = Matrix(20);
-    val loopDelay = 250L;
+    val matrix = Matrix(32);
+    val loopDelay = 100L;
     var on = false;
 
 
