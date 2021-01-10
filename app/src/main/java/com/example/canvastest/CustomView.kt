@@ -24,7 +24,6 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
     private lateinit var myBitmap: Bitmap
     private lateinit var myCanvas: Canvas
 
-
     private var matrixSize = 0 //wielkosc planszy
     private var borderThickness = 2f //szerokosc grida
     private var squareSize = 0f //pojedynczy kwadrat
@@ -234,11 +233,12 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
         {
             myCanvas.drawRect(column * squareSize + borderThickness, row * squareSize + borderThickness, column * squareSize + squareSize - borderThickness, row * squareSize + squareSize - borderThickness, squarePaintBlank)
         }
-
     }
 
     private fun drawMatrix()
     {
+        myCanvas.drawColor(Color.GRAY)
+
         for( i in 0..myMatrix.count-1)
         {
             for( j in 0..myMatrix.count-1)
@@ -247,23 +247,6 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
             }
         }
 
-        invalidate()
-    }
-
-
-    //metoda wywolywana podczas zmiany rozmiaru ekranu telefonu, czyli tylko podczas odpalenia programu
-    override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
-        super.onSizeChanged(width, height, oldWidth, oldHeight)
-        if (::myBitmap.isInitialized) myBitmap.recycle()
-        //ustalenie parametrow poczatkowych
-        matrixSize = height
-        //myMatrix = Matrix(20)
-        myBitmap = createBitmap(matrixSize, matrixSize, Bitmap.Config.ARGB_8888)
-        myCanvas = Canvas(myBitmap)
-        myCanvas.drawColor(Color.GRAY)
-        squareSize = (matrixSize / myMatrix.count + borderThickness / 2)
-
-        //rysowanie grida
         for(j in 1 until myMatrix.count)
         {
             myCanvas.drawLine(squareSize * j, 0f, squareSize * j, matrixSize.toFloat(), gridPaint)
@@ -272,8 +255,37 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
         {
             myCanvas.drawLine(0f, squareSize * j, matrixSize.toFloat(), squareSize * j, gridPaint)
         }
+    }
 
-        //ustawienie poczatku widoku na srodek canvas'u
+    //metoda wywolywana podczas zmiany rozmiaru ekranu telefonu, czyli tylko podczas odpalenia programu
+    @RequiresApi(Build.VERSION_CODES.N)
+    override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight)
+        if (::myBitmap.isInitialized) myBitmap.recycle()
+
+        //ustalenie parametrow poczatkowych
+        matrixSize = height
+        myBitmap = createBitmap(matrixSize, matrixSize, Bitmap.Config.ARGB_8888)
+        myCanvas = Canvas(myBitmap)
+        updateSquareSize()
+        update()
+        putViewInTheMiddle()
+    }
+
+    fun updateSquareSize()
+    {
+        squareSize = (matrixSize / myMatrix.count + borderThickness / 2)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun update()
+    {
+        drawMatrix()
+        invalidate()
+    }
+
+    private fun putViewInTheMiddle()
+    {
         startX = (matrixSize - width)/2f
         viewX = -startX
     }
@@ -288,13 +300,4 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
             restore()
         }
     }
-
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    fun update()
-    {
-        drawMatrix()
-        invalidate()
-    }
-
 }
