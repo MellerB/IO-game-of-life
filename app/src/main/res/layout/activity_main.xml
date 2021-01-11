@@ -21,18 +21,36 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/pause"
-        android:layout_width="300dp"
-        android:layout_height="200dp"
-        app:fabCustomSize="100dp"
-        android:layout_centerHorizontal="true"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        app:fabCustomSize="75dp"
         android:layout_alignTop="@id/bottomPlaceHolder"
-        app:srcCompat="@android:drawable/ic_media_play"
-        />
+        android:layout_centerHorizontal="true"
+        app:srcCompat="@android:drawable/ic_media_play" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/sizeUp"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        app:fabCustomSize="75dp"
+        android:layout_alignTop="@id/bottomPlaceHolder"
+        android:layout_alignParentEnd="true"
+        app:srcCompat="@android:drawable/arrow_up_float" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/sizeDown"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        app:fabCustomSize="75dp"
+        android:layout_alignTop="@id/bottomPlaceHolder"
+        android:layout_alignParentStart="true"
+        app:srcCompat="@android:drawable/arrow_down_float" />
+
 
     <View
         android:id="@+id/bottomPlaceHolder"
-        android:layout_height="150dp"
         android:layout_width="match_parent"
+        android:layout_height="150dp"
         android:layout_alignParentBottom="true"
-        />
+        android:layout_marginBottom="-1dp" />
 </RelativeLayout>
