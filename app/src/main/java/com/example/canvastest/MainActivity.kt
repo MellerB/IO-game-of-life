@@ -1,23 +1,81 @@
 package com.example.canvastest
 
-import android.annotation.SuppressLint
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.widget.Button
+import android.view.MotionEvent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.internal.ContextUtils.getActivity
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
 
     val matrix = Matrix(32);
-    val loopDelay = 100L;
+    var loopDelay = 100L;
+    val borderTreshold = 0.3
+
+    val screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+    val screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+    val leftBorder = (screenWidth*borderTreshold).toInt()
+    val rightBorder = screenWidth-leftBorder
+    val multip = 10.0
+
     var on = false;
+
+    var xpos=0;
+    var ypos=0;
+    var lastMeasure = System.currentTimeMillis();
+    override fun dispatchTouchEvent(event: MotionEvent):Boolean{
+        if(System.currentTimeMillis() - lastMeasure > 50) {
+            val x = event.x.toInt()
+            val y = event.y.toInt()
+            val xdelta = xpos - x
+            var ydelta = ypos - y
+            if(ydelta<0)
+            {
+                ydelta-=10
+            }
+            else if (ydelta>0)
+            {
+                ydelta+=10
+            }
+
+            when (event.action) {
+                MotionEvent.ACTION_MOVE -> {
+                    if (x > rightBorder) {
+                        var floatDelta = ((ydelta) * (loopDelay*loopDelay*loopDelay)/1000000000*multip)
+                        if(ydelta<0)
+                        {
+                            floatDelta-=5
+                        }
+                        else if (ydelta>0)
+                        {
+                            floatDelta+=5
+                        }
+                        loopDelay -= floatDelta.toInt()
+                        if (loopDelay < 5) {
+                            loopDelay = 5
+                        }
+                        if (loopDelay > 1000) {
+                            loopDelay = 1000
+                        }
+                    }
+                    Log.d("delay", "$loopDelay")
+                }
+            }
+            xpos = x;
+            ypos = y;
+            lastMeasure=System.currentTimeMillis()
+        }
+
+        return super.dispatchTouchEvent(event)
+        }
+
+
 
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -113,6 +171,7 @@ class MainActivity : AppCompatActivity() {
         cv.update()
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     fun turnOffIfOn() {
         if(on)
         {
