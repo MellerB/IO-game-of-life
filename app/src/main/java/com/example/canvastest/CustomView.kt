@@ -59,7 +59,7 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
     }
     private val squarePaintBlank = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        setColor(Color.GRAY)
+        setColor(Color.DKGRAY)
     }
 
     private val myListener =  object : GestureDetector.SimpleOnGestureListener() {

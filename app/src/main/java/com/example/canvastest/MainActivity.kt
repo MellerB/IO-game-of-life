@@ -1,9 +1,11 @@
 package com.example.canvastest
 
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.MotionEvent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +18,11 @@ class MainActivity : AppCompatActivity()
     private val viewModel: MyViewModel by viewModels {
         SavedStateViewModelFactory(application, this)
     }
+
+
     private lateinit var matrixView: CustomView
+
+
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +57,63 @@ class MainActivity : AppCompatActivity()
         handler.postDelayed(r, 0)
 
     }
+
+    val borderTreshold = 0.3
+    val screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+    val screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+    val leftBorder = (screenWidth*borderTreshold).toInt()
+    val rightBorder = screenWidth-leftBorder
+    val multip = 10.0
+        var xpos=0;
+        var ypos=0;
+        var lastMeasure = System.currentTimeMillis();
+        override fun dispatchTouchEvent(event: MotionEvent):Boolean{
+            if(System.currentTimeMillis() - lastMeasure > 50) {
+                    val x = event.x.toInt()
+                    val y = event.y.toInt()
+                    val xdelta = xpos - x
+                    var ydelta = ypos - y
+                    if(ydelta<0)
+                        {
+                                ydelta-=10
+                            }
+                    else if (ydelta>0)
+                        {
+                                ydelta+=10
+                            }
+
+                    when (event.action) {
+                            MotionEvent.ACTION_MOVE -> {
+                                    if (x > rightBorder) {
+                                            var floatDelta = ((ydelta) * (viewModel.loopDelay*viewModel.loopDelay*viewModel.loopDelay)/1000000000*multip)
+                                            if(ydelta<0)
+                                                {
+                                                        floatDelta-=5
+                                                    }
+                                            else if (ydelta>0)
+                                                {
+                                                        floatDelta+=5
+                                                    }
+                                            viewModel.loopDelay -= floatDelta.toInt()
+                                            if (viewModel.loopDelay < 5) {
+                                                    viewModel.loopDelay = 5
+                                                }
+                                            if (viewModel.loopDelay > 1000) {
+                                                    viewModel.loopDelay = 1000
+                                                }
+                                        }
+                                    Log.d("delay", "$viewModel.loopDelay")
+                                }
+                        }
+                    xpos = x;
+                    ypos = y;
+                    lastMeasure=System.currentTimeMillis()
+                }
+
+            return super.dispatchTouchEvent(event)
+            }
+
+
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun handleShortClick()
