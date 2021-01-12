@@ -5,44 +5,46 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
 import androidx.annotation.RequiresApi
-import kotlin.math.log
+import java.util.*
 
-data class Matrix ( val _count: Int ): Parcelable
+
+data class Matrix(val _count: Int): Parcelable
 {
     var matrix = Array(_count) { BooleanArray(_count) }
+
     val neighbours = listOf(
-            Pair(-1,-1),
-            Pair(-1,0),
-            Pair(-1,1),
-            Pair(0,-1),
-            Pair(0,1),
-            Pair(1,-1),
-            Pair(1,0),
-            Pair(1,1)
+            Pair(-1, -1),
+            Pair(-1, 0),
+            Pair(-1, 1),
+            Pair(0, -1),
+            Pair(0, 1),
+            Pair(1, -1),
+            Pair(1, 0),
+            Pair(1, 1)
     )
-    val aliveRules = listOf(2,3);
+    val aliveRules = listOf(2, 3);
     val deadRules = listOf(3);
 
     var count = _count;
 
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun changeBoolean(row: Int, column: Int ) :Boolean
+    fun changeBoolean(row: Int, column: Int) :Boolean
     {
         matrix[row][column] = !matrix[row][column]
-        Log.d("Neighbours: ",getNeighboursNumber(row,column).toString());
+        Log.d("Neighbours: ", getNeighboursNumber(row, column).toString());
         return matrix[row][column];
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun getNeighboursNumber(row: Int, column: Int ): Int
+    fun getNeighboursNumber(row: Int, column: Int): Int
     {
         var n = 0
 
         for(neighbour in neighbours)
         {
-                val r = Math.floorMod(row+neighbour.first,count);
-                val c = Math.floorMod(column+neighbour.second,count);
+                val r = Math.floorMod(row + neighbour.first, count);
+                val c = Math.floorMod(column + neighbour.second, count);
                 if (matrix[r][c])
                 {
                     n++;
@@ -60,7 +62,7 @@ data class Matrix ( val _count: Int ): Parcelable
         {
             for(col in 0..count-1)
             {
-                val n = getNeighboursNumber(row,col);
+                val n = getNeighboursNumber(row, col);
                 if(matrix[row][col] && (n in aliveRules))
                 {
                     newMatrix[row][col] = true;

@@ -134,14 +134,15 @@ class MainActivity : AppCompatActivity()
         val tmp = Array(viewModel.matrix.count) { BooleanArray(viewModel.matrix.count) }
         for(i in 1..tmp.size - 2)
         {
+
             for(j in 1..tmp.size - 2)
             {
                 tmp[i][j] = viewModel.matrix.matrix[i - 1][j - 1]
             }
         }
         viewModel.matrix.matrix = tmp
-        matrixView.myMatrix = viewModel.matrix
         matrixView.updateSquareSize()
+        matrixView.myMatrix = viewModel.matrix
         matrixView.update()
     }
 
