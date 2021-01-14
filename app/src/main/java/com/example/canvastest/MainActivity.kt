@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity()
 
         matrixView = findViewById(R.id.customView)
         matrixView.myMatrix = viewModel.matrix
+        matrixView.updateSquareSize()
 
         val buttonPause = findViewById<FloatingActionButton>(R.id.pause)
         buttonPause.setOnLongClickListener{onPlay()}
@@ -190,22 +191,22 @@ class MainActivity : AppCompatActivity()
         }
     }
 
+
     @RequiresApi(Build.VERSION_CODES.N)
     fun increaseMatrixCount()
     {
         viewModel.matrix.increaseMatrixCount()
-        val tmp = Array(viewModel.matrix.count) { BooleanArray(viewModel.matrix.count) }
-        for(i in 1..tmp.size - 2)
-        {
 
-            for(j in 1..tmp.size - 2)
-            {
-                tmp[i][j] = viewModel.matrix.matrix[i - 1][j - 1]
-            }
+        viewModel.matrix.matrix.add(0, MutableList(viewModel.matrix.count){ false } )
+        for(i in 1..viewModel.matrix.count - 2)
+        {
+            viewModel.matrix.matrix[i].add(0,false)
+            viewModel.matrix.matrix[i].add(viewModel.matrix.count - 1, false)
         }
-        viewModel.matrix.matrix = tmp
+        viewModel.matrix.matrix.add(viewModel.matrix.count - 1, MutableList(viewModel.matrix.count){ false })
+
+
         matrixView.updateSquareSize()
-        matrixView.myMatrix = viewModel.matrix
         matrixView.update()
     }
 
@@ -215,16 +216,15 @@ class MainActivity : AppCompatActivity()
         if(viewModel.matrix.count >= 10)
         {
             viewModel.matrix.reduceMatrixCount()
-            val tmp = Array(viewModel.matrix.count) { BooleanArray(viewModel.matrix.count) }
-            for(i in 0..tmp.size - 1)
+
+            viewModel.matrix.matrix.removeAt(0)
+            for(i in 0..viewModel.matrix.count - 1)
             {
-                for(j in 0..tmp.size - 1)
-                {
-                    tmp[i][j] = viewModel.matrix.matrix[i + 1][j + 1]
-                }
+                viewModel.matrix.matrix[i].removeAt(0)
+                viewModel.matrix.matrix[i].removeAt(viewModel.matrix.count)
             }
-            viewModel.matrix.matrix = tmp
-            matrixView.myMatrix = viewModel.matrix
+            viewModel.matrix.matrix.removeAt(viewModel.matrix.count)
+
             matrixView.updateSquareSize()
             matrixView.update()
         }

@@ -10,7 +10,7 @@ import java.util.*
 
 data class Matrix(val _count: Int): Parcelable
 {
-    var matrix = Array(_count) { BooleanArray(_count) }
+    var matrix = MutableList(_count) { MutableList(_count){ false } }
 
     val neighbours = listOf(
             Pair(-1, -1),
@@ -22,11 +22,14 @@ data class Matrix(val _count: Int): Parcelable
             Pair(1, 0),
             Pair(1, 1)
     )
-    val aliveRules = listOf(2, 3);
-    val deadRules = listOf(3);
-
+    val aliveRules = listOf(2, 3)
+    val deadRules = listOf(3)
     var count = _count;
 
+//    fun <T> generate(size: Int, value: T): MutableList<T> {
+//        println("weszło")
+//        return (0 until size).map { value }.toMutableList()
+//    }
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun changeBoolean(row: Int, column: Int) :Boolean
@@ -56,8 +59,8 @@ data class Matrix(val _count: Int): Parcelable
     @RequiresApi(Build.VERSION_CODES.N)
     fun nextGeneration()
     {
-        val newMatrix = Array(count) { BooleanArray(count) }
-
+//        val newMatrix = Array(count) { BooleanArray(count) }
+        val newMatrix = MutableList(count) { MutableList(count){ false }  }
         for(row in 0..count-1)
         {
             for(col in 0..count-1)
@@ -91,7 +94,12 @@ data class Matrix(val _count: Int): Parcelable
     {
         for(i in 0..count - 1)
         {
-            parcel.readBooleanArray(matrix[i])
+//            parcel.readBooleanArray(matrix[i])
+//            parcel.read
+
+            matrix[i] = parcel.createBooleanArray()?.toMutableList()!!
+
+//            parcel.readList(matrix[i] as List<Boolean>, null)
         }
     }
 
@@ -100,7 +108,7 @@ data class Matrix(val _count: Int): Parcelable
         parcel.writeInt(count)
         for(i in 0..count - 1)
         {
-            parcel.writeBooleanArray(matrix[i])
+            parcel.writeBooleanArray(matrix[i].toBooleanArray())
         }
     }
 
