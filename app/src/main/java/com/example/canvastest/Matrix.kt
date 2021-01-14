@@ -26,11 +26,6 @@ data class Matrix(val _count: Int): Parcelable
     val deadRules = listOf(3)
     var count = _count;
 
-//    fun <T> generate(size: Int, value: T): MutableList<T> {
-//        println("weszło")
-//        return (0 until size).map { value }.toMutableList()
-//    }
-
     @RequiresApi(Build.VERSION_CODES.N)
     fun changeBoolean(row: Int, column: Int) :Boolean
     {
@@ -94,12 +89,7 @@ data class Matrix(val _count: Int): Parcelable
     {
         for(i in 0..count - 1)
         {
-//            parcel.readBooleanArray(matrix[i])
-//            parcel.read
-
             matrix[i] = parcel.createBooleanArray()?.toMutableList()!!
-
-//            parcel.readList(matrix[i] as List<Boolean>, null)
         }
     }
 
