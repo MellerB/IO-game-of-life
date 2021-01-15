@@ -26,6 +26,7 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
 
     private var matrixSize = 0 //wielkosc planszy
     private var borderThickness = 2f //szerokosc grida
+    private var outerBorderThickness = borderThickness/2
     private var squareSize = 0f //pojedynczy kwadrat
 
     //zmienne okreslajace ostatnie polozenie palca podczas scroll'owania
@@ -53,6 +54,13 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
         strokeWidth = borderThickness
         setColor(Color.CYAN)
     }
+
+    private val gridCornerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = borderThickness/2
+        setColor(Color.CYAN)
+    }
+
     private val squarePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         setColor(Color.RED)
@@ -225,14 +233,18 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
 
     private fun colorSquare(row: Int, column: Int)
     {
-        if(myMatrix.matrix[row][column])
+        val currentPaint: Paint = if(myMatrix.matrix[row][column])
         {
-            myCanvas.drawRect(column * squareSize + borderThickness, row * squareSize + borderThickness, column * squareSize + squareSize - borderThickness, row * squareSize + squareSize - borderThickness, squarePaint)
+            squarePaint
         }
         else
         {
-            myCanvas.drawRect(column * squareSize + borderThickness, row * squareSize + borderThickness, column * squareSize + squareSize - borderThickness, row * squareSize + squareSize - borderThickness, squarePaintBlank)
+            squarePaintBlank
         }
+        myCanvas.drawRect(column * squareSize,
+                row * squareSize,
+                column * squareSize + squareSize,
+                row * squareSize + squareSize, currentPaint)
     }
 
     private fun drawMatrix()
@@ -247,14 +259,46 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
             }
         }
 
+        myCanvas.drawLine(outerBorderThickness/2,
+                0f,
+                outerBorderThickness/2,
+                matrixSize.toFloat(),
+                gridCornerPaint)
+
         for(j in 1 until myMatrix.count)
         {
-            myCanvas.drawLine(squareSize * j, 0f, squareSize * j, matrixSize.toFloat(), gridPaint)
+            myCanvas.drawLine(squareSize * j,
+                    0f,
+                    squareSize * j,
+                    matrixSize.toFloat(),
+                    gridPaint)
         }
+
+        myCanvas.drawLine(matrixSize.toFloat() - outerBorderThickness/2,
+                0f,
+                matrixSize.toFloat() - outerBorderThickness/2,
+                matrixSize.toFloat(),
+                gridCornerPaint)
+
+        myCanvas.drawLine(0f,
+                outerBorderThickness/2,
+                matrixSize.toFloat(),
+                outerBorderThickness/2,
+                gridCornerPaint)
+
         for(j in 1 until myMatrix.count)
         {
-            myCanvas.drawLine(0f, squareSize * j, matrixSize.toFloat(), squareSize * j, gridPaint)
+            myCanvas.drawLine(0f,
+                    squareSize * j,
+                    matrixSize.toFloat(),
+                    squareSize * j,
+                    gridPaint)
         }
+        myCanvas.drawLine(0f,
+                matrixSize.toFloat() - outerBorderThickness/2,
+                matrixSize.toFloat(),
+                matrixSize.toFloat() - outerBorderThickness/2,
+                gridCornerPaint)
     }
 
     //metoda wywolywana podczas zmiany rozmiaru ekranu telefonu, czyli tylko podczas odpalenia programu
@@ -274,7 +318,7 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
 
     fun updateSquareSize()
     {
-        squareSize = (matrixSize / myMatrix.count + borderThickness / 2)
+        squareSize = (matrixSize.toFloat() / myMatrix.count)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
