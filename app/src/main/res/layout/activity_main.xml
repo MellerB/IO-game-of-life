@@ -19,6 +19,81 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal" >
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/buttonOpen"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:fabCustomSize="60dp"
+        android:layout_alignTop="@id/customView"
+        android:layout_alignParentLeft="true"
+        app:srcCompat="@drawable/ic_open"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:visibility="gone"
+        />
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/buttonSave"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:fabCustomSize="60dp"
+            android:layout_alignTop="@id/customView"
+            android:layout_alignParentLeft="true"
+            app:srcCompat="@drawable/ic_save"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:visibility="gone"
+            />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/menuHideShow"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:fabCustomSize="60dp"
+            android:layout_alignTop="@id/customView"
+            android:layout_alignParentLeft="true"
+            app:srcCompat="@drawable/ic_menu"
+            android:layout_marginRight="25dp"
+            android:layout_marginLeft="25dp"
+            />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/sizeUp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:fabCustomSize="60dp"
+            android:layout_alignTop="@id/customView"
+            android:layout_alignParentLeft="true"
+            app:srcCompat="@drawable/ic_plus"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:visibility="gone"
+            />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/sizeDown"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:fabCustomSize="60dp"
+            android:layout_alignTop="@id/customView"
+            android:layout_alignParentLeft="true"
+            app:srcCompat="@drawable/ic_minus"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:visibility="gone"
+            />
+
+    </LinearLayout>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/pause"
         android:layout_width="75dp"
@@ -28,29 +103,11 @@
         android:layout_centerHorizontal="true"
         app:srcCompat="@android:drawable/ic_media_play" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/sizeUp"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        app:fabCustomSize="75dp"
-        android:layout_alignTop="@id/bottomPlaceHolder"
-        android:layout_alignParentEnd="true"
-        app:srcCompat="@android:drawable/arrow_up_float" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/sizeDown"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        app:fabCustomSize="75dp"
-        android:layout_alignTop="@id/bottomPlaceHolder"
-        android:layout_alignParentStart="true"
-        app:srcCompat="@android:drawable/arrow_down_float" />
-
 
     <View
         android:id="@+id/bottomPlaceHolder"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="100dp"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="-1dp" />
 </RelativeLayout>

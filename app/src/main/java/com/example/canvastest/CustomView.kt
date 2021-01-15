@@ -48,6 +48,10 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
     //zmienna pomocnicza okreslajaca czy widok jest aktualnie zoomowany
     private var scalingBool = false
 
+    fun isZoommed(): Boolean {
+        return scalingBool || myScaleFactor != minScaleFactor
+    }
+
     //okreslenie wlasnosci malowania na canvasie
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -206,7 +210,7 @@ class CustomView @kotlin.jvm.JvmOverloads constructor(context: Context, attrs: A
             else true
         }
         invalidate()
-        return normalGesture || zoomedGesture || super.onTouchEvent(event)
+        return normalGesture || zoomedGesture
     }
 
     private fun checkEdges()

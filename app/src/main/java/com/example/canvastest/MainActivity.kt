@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.SavedStateViewModelFactory
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -46,6 +48,27 @@ class MainActivity : AppCompatActivity()
         buttonReduceMatrixCount.setOnClickListener {
             reduceMatrixCount()
         }
+
+        val buttonMenuShowHide = findViewById<FloatingActionButton>(R.id.menuHideShow)
+        val buttonSave = findViewById<FloatingActionButton>(R.id.buttonSave)
+        val buttonOpen = findViewById<FloatingActionButton>(R.id.buttonOpen)
+
+        buttonMenuShowHide.setOnClickListener {
+            if(buttonIncreaseMatrixCount.visibility == View.VISIBLE)
+            {
+                buttonIncreaseMatrixCount.visibility = View.GONE
+                buttonReduceMatrixCount.visibility = View.GONE
+                buttonSave.visibility = View.GONE
+                buttonOpen.visibility = View.GONE
+            }
+            else
+            {
+                buttonIncreaseMatrixCount.visibility = View.VISIBLE
+                buttonReduceMatrixCount.visibility = View.VISIBLE
+                buttonSave.visibility = View.VISIBLE
+                buttonOpen.visibility = View.VISIBLE
+            }
+        }
         //val buttonNextGen = findViewById<Button>(R.id.next_gen)
         //buttonNextGen.setOnClickListener{nextGeneration()}
 
@@ -59,20 +82,14 @@ class MainActivity : AppCompatActivity()
 
     }
 
-    val borderTreshold = 0.3
-    val screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
-    val screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
-    val leftBorder = (screenWidth*borderTreshold).toInt()
-    val rightBorder = screenWidth-leftBorder
+
     val multip = 10.0
-        var xpos=0;
         var ypos=0;
         var lastMeasure = System.currentTimeMillis();
         override fun dispatchTouchEvent(event: MotionEvent):Boolean{
             if(System.currentTimeMillis() - lastMeasure > 50) {
                     val x = event.x.toInt()
                     val y = event.y.toInt()
-                    val xdelta = xpos - x
                     var ydelta = ypos - y
                     if(ydelta<0)
                         {
@@ -85,7 +102,7 @@ class MainActivity : AppCompatActivity()
 
                     when (event.action) {
                             MotionEvent.ACTION_MOVE -> {
-                                    if (x > rightBorder) {
+                                    if (!matrixView.isZoommed()) {
                                             var floatDelta = ((ydelta) * (viewModel.loopDelay*viewModel.loopDelay*viewModel.loopDelay)/1000000000*multip)
                                             if(ydelta<0)
                                                 {
@@ -106,7 +123,7 @@ class MainActivity : AppCompatActivity()
                                     Log.d("delay", "$viewModel.loopDelay")
                                 }
                         }
-                    xpos = x;
+
                     ypos = y;
                     lastMeasure=System.currentTimeMillis()
                 }
