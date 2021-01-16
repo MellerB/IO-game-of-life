@@ -1,18 +1,22 @@
 package com.example.canvastest
 
-import android.content.res.Resources
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.lifecycle.SavedStateViewModelFactory
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 
 class MainActivity : AppCompatActivity()
@@ -20,11 +24,7 @@ class MainActivity : AppCompatActivity()
     private val viewModel: MyViewModel by viewModels {
         SavedStateViewModelFactory(application, this)
     }
-
-
     private lateinit var matrixView: CustomView
-
-
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,10 +49,17 @@ class MainActivity : AppCompatActivity()
             reduceMatrixCount()
         }
 
-        val buttonMenuShowHide = findViewById<FloatingActionButton>(R.id.menuHideShow)
         val buttonSave = findViewById<FloatingActionButton>(R.id.buttonSave)
-        val buttonOpen = findViewById<FloatingActionButton>(R.id.buttonOpen)
+        buttonSave.setOnClickListener {
+            showAddItemDialog(this)
+        }
 
+        val buttonOpen = findViewById<FloatingActionButton>(R.id.buttonOpen)
+        buttonOpen.setOnClickListener {
+            showLoadItemDialog(this)
+        }
+
+        val buttonMenuShowHide = findViewById<FloatingActionButton>(R.id.menuHideShow)
         buttonMenuShowHide.setOnClickListener {
             if(buttonIncreaseMatrixCount.visibility == View.VISIBLE)
             {
@@ -69,6 +76,8 @@ class MainActivity : AppCompatActivity()
                 buttonOpen.visibility = View.VISIBLE
             }
         }
+
+
         //val buttonNextGen = findViewById<Button>(R.id.next_gen)
         //buttonNextGen.setOnClickListener{nextGeneration()}
 
@@ -79,7 +88,6 @@ class MainActivity : AppCompatActivity()
             handler.postDelayed(r, viewModel.loopDelay)
         }
         handler.postDelayed(r, 0)
-
     }
 
 
@@ -101,27 +109,25 @@ class MainActivity : AppCompatActivity()
                             }
 
                     when (event.action) {
-                            MotionEvent.ACTION_MOVE -> {
-                                    if (!matrixView.isZoommed()) {
-                                            var floatDelta = ((ydelta) * (viewModel.loopDelay*viewModel.loopDelay*viewModel.loopDelay)/1000000000*multip)
-                                            if(ydelta<0)
-                                                {
-                                                        floatDelta-=5
-                                                    }
-                                            else if (ydelta>0)
-                                                {
-                                                        floatDelta+=5
-                                                    }
-                                            viewModel.loopDelay -= floatDelta.toInt()
-                                            if (viewModel.loopDelay < 5) {
-                                                    viewModel.loopDelay = 5
-                                                }
-                                            if (viewModel.loopDelay > 1000) {
-                                                    viewModel.loopDelay = 1000
-                                                }
-                                        }
-                                    Log.d("delay", "$viewModel.loopDelay")
+                        MotionEvent.ACTION_MOVE -> {
+                            if (!matrixView.isZoommed()) {
+                                var floatDelta =
+                                    ((ydelta) * (viewModel.loopDelay * viewModel.loopDelay * viewModel.loopDelay) / 1000000000 * multip)
+                                if (ydelta < 0) {
+                                    floatDelta -= 5
+                                } else if (ydelta > 0) {
+                                    floatDelta += 5
                                 }
+                                viewModel.loopDelay -= floatDelta.toInt()
+                                if (viewModel.loopDelay < 5) {
+                                    viewModel.loopDelay = 5
+                                }
+                                if (viewModel.loopDelay > 1000) {
+                                    viewModel.loopDelay = 1000
+                                }
+                            }
+                            Log.d("delay", "$viewModel.loopDelay")
+                        }
                         }
 
                     ypos = y;
@@ -214,14 +220,15 @@ class MainActivity : AppCompatActivity()
     {
         viewModel.matrix.increaseMatrixCount()
 
-        viewModel.matrix.matrix.add(0, MutableList(viewModel.matrix.count){ false } )
+        viewModel.matrix.matrix.add(0, MutableList(viewModel.matrix.count) { false })
         for(i in 1..viewModel.matrix.count - 2)
         {
-            viewModel.matrix.matrix[i].add(0,false)
+            viewModel.matrix.matrix[i].add(0, false)
             viewModel.matrix.matrix[i].add(viewModel.matrix.count - 1, false)
         }
-        viewModel.matrix.matrix.add(viewModel.matrix.count - 1, MutableList(viewModel.matrix.count){ false })
-
+        viewModel.matrix.matrix.add(
+            viewModel.matrix.count - 1,
+            MutableList(viewModel.matrix.count) { false })
 
         matrixView.updateSquareSize()
         matrixView.update()
@@ -245,6 +252,106 @@ class MainActivity : AppCompatActivity()
             matrixView.updateSquareSize()
             matrixView.update()
         }
+    }
+
+    private fun showAddItemDialog(c: Context) {
+        val taskEditText = EditText(c)
+        val dialog: AlertDialog = AlertDialog.Builder(c)
+            .setTitle("Zapis planszy")
+            .setMessage("Dodaj komentarz zapisu")
+            .setView(taskEditText)
+            .setPositiveButton("Dodaj"
+            ) { dialog, which ->
+                if(taskEditText.text.toString().length > 0)
+                {
+                    saveCurrentMatrix(taskEditText.text.toString())
+                }
+            }
+            .setNegativeButton("Anuluj", null)
+            .create()
+        dialog.show()
+    }
+
+    fun saveCurrentMatrix(comment: String)
+    {
+        val copy = Array(viewModel.matrix.count) { BooleanArray(viewModel.matrix.count) }
+        for(i in 0..copy.size - 1)
+        {
+            copy[i] = viewModel.matrix.matrix[i].toBooleanArray()
+        }
+        val savedData = (SaveListItem(copy, comment))
+
+        viewModel.listOfSaves.add(savedData)
+        saveMatrixListRecords()
+    }
+
+    fun saveMatrixListRecords()
+    {
+        val mPrefs = getPreferences(MODE_PRIVATE)
+        val prefsEditor = mPrefs.edit()
+        val json = Gson().toJson(viewModel.listOfSaves)
+
+        prefsEditor.putString("SavedObject", json)
+        prefsEditor.apply()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun showLoadItemDialog(c: Context) {
+        loadSavedMatrixListToMenu()
+        val builder = AlertDialog.Builder(c)
+        builder.setTitle("Wybierz zapis")
+
+        val arrayFromList = Array<CharSequence>(viewModel.listOfSaves.size) {
+            viewModel.listOfSaves[it].comment
+        }
+
+        var checkedItem = 0
+        builder.setSingleChoiceItems(arrayFromList, checkedItem) { dialog, which ->
+            checkedItem = which
+        }
+        builder.setPositiveButton("Załaduj") { dialog, which ->
+            loadChosenMatrix(checkedItem)
+        }
+        builder.setNegativeButton("Usuń") { dialog, which ->
+            removeChoosenMatrix(checkedItem)
+            saveMatrixListRecords()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun loadSavedMatrixListToMenu()
+    {
+        val mPrefs = getPreferences(MODE_PRIVATE)
+        val json = mPrefs.getString("SavedObject", "")
+
+        val itemType = object: TypeToken<MutableList<SaveListItem>>() {}.type
+        viewModel.listOfSaves = Gson().fromJson(json, itemType)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun loadChosenMatrix(index: Int)
+    {
+        val copy =
+                MutableList(viewModel.listOfSaves[index].matrix.size)
+                { MutableList(viewModel.listOfSaves[index].matrix.size){ false }}
+        for(i in 0..copy.size - 1)
+        {
+            copy[i] = viewModel.listOfSaves[index].matrix[i].toMutableList()
+        }
+        viewModel.matrix.matrix = copy
+        viewModel.matrix.count = viewModel.matrix.matrix.size
+        matrixView.myMatrix = viewModel.matrix
+
+        matrixView.updateSquareSize()
+        matrixView.update()
+    }
+
+    fun removeChoosenMatrix(index: Int)
+    {
+        viewModel.listOfSaves.removeAt(index)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

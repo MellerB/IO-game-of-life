@@ -8,9 +8,9 @@ import androidx.annotation.RequiresApi
 import java.util.*
 
 
-data class Matrix(val _count: Int): Parcelable
+data class Matrix(var count: Int): Parcelable
 {
-    var matrix = MutableList(_count) { MutableList(_count){ false } }
+    var matrix = MutableList(count) { MutableList(count){ false } }
 
     val neighbours = listOf(
             Pair(-1, -1),
@@ -24,7 +24,6 @@ data class Matrix(val _count: Int): Parcelable
     )
     val aliveRules = listOf(2, 3)
     val deadRules = listOf(3)
-    var count = _count;
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun changeBoolean(row: Int, column: Int) :Boolean

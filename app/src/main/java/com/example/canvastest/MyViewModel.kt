@@ -7,6 +7,7 @@ class MyViewModel(val handle: SavedStateHandle): ViewModel() {
     var matrix = Matrix(10)
     var loopDelay = 250L
     var on = false
+    var listOfSaves = mutableListOf<SaveListItem>()
 
     fun setSavedMatrix()
     {
