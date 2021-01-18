@@ -377,10 +377,17 @@ class MainActivity : AppCompatActivity()
     @RequiresApi(Build.VERSION_CODES.N)
     fun loadSavedMatrixListToMenu()
     {
+
         val mPrefs = getPreferences(MODE_PRIVATE)
         val json = mPrefs.getString("SavedObject", "")
+        if (json == null)
+        {
+            saveMatrixListRecords()
+        }
 
         val itemType = object: TypeToken<MutableList<SaveListItem>>() {}.type
+
+
         viewModel.listOfSaves = Gson().fromJson(json, itemType)
     }
 
