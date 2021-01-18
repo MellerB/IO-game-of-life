@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 
 class MyViewModel(val handle: SavedStateHandle): ViewModel() {
-    var matrix = Matrix(10)
+    var matrix = Matrix(16)
     var loopDelay = 250L
     var on = false
     var listOfSaves = mutableListOf<SaveListItem>()

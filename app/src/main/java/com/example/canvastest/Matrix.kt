@@ -8,8 +8,12 @@ import androidx.annotation.RequiresApi
 import java.util.*
 
 
+
 data class Matrix(var count: Int): Parcelable
 {
+    val MATRIX_MAX_SIZE = 1000
+    val MATRIX_MIN_SIZE = 10
+
     var matrix = MutableList(count) { MutableList(count){ false } }
 
     val neighbours = listOf(
@@ -53,7 +57,6 @@ data class Matrix(var count: Int): Parcelable
     @RequiresApi(Build.VERSION_CODES.N)
     fun nextGeneration()
     {
-//        val newMatrix = Array(count) { BooleanArray(count) }
         val newMatrix = MutableList(count) { MutableList(count){ false }  }
         for(row in 0..count-1)
         {
@@ -74,19 +77,28 @@ data class Matrix(var count: Int): Parcelable
         matrix = newMatrix;
     }
 
-    fun increaseMatrixCount()
+    fun increaseMatrixCount() :Boolean
     {
-        count += 2
+
+        if(count < MATRIX_MAX_SIZE) {
+            count += 2
+            return true
+        }
+        return false
     }
 
-    fun reduceMatrixCount()
+    fun reduceMatrixCount():Boolean
     {
-        count -= 2
+        if(count > MATRIX_MIN_SIZE) {
+            count -= 2
+            return true
+        }
+        return false
     }
 
     constructor(parcel: Parcel) : this(parcel.readInt())
     {
-        for(i in 0..count - 1)
+        for(i in 0 until count)
         {
             matrix[i] = parcel.createBooleanArray()?.toMutableList()!!
         }
@@ -95,14 +107,14 @@ data class Matrix(var count: Int): Parcelable
     override fun writeToParcel(parcel: Parcel, flags: Int)
     {
         parcel.writeInt(count)
-        for(i in 0..count - 1)
+        for(i in 0 until count)
         {
             parcel.writeBooleanArray(matrix[i].toBooleanArray())
         }
     }
 
     override fun describeContents(): Int {
-        TODO("Not yet implemented")
+        return matrix.count()
     }
 
     companion object CREATOR : Parcelable.Creator<Matrix> {
