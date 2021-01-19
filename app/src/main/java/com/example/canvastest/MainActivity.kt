@@ -84,15 +84,8 @@ class MainActivity : AppCompatActivity()
                 buttonSave.visibility = View.VISIBLE
                 buttonOpen.visibility = View.VISIBLE
             }
-
-
         }
 
-
-
-
-        //val buttonNextGen = findViewById<Button>(R.id.next_gen)
-        //buttonNextGen.setOnClickListener{nextGeneration()}
 
         val handler = Handler()
         lateinit var r: Runnable
@@ -120,12 +113,11 @@ class MainActivity : AppCompatActivity()
             (buttonOpen as FloatingActionButton).setEnabled(true);
             buttonOpen.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.teal_200))
         }
-
     }
 
-    val multip = 10.0
-        var ypos=0;
-        var lastMeasure = System.currentTimeMillis();
+        private val multip = 10.0
+        private var ypos = 0;
+        private var lastMeasure = System.currentTimeMillis();
         override fun dispatchTouchEvent(event: MotionEvent):Boolean{
             if(System.currentTimeMillis() - lastMeasure > 50) {
                     val x = event.x.toInt()
@@ -201,15 +193,6 @@ class MainActivity : AppCompatActivity()
         viewModel.matrix.nextGeneration();
         matrixView.update()
         Log.d("INFO", "gen done ")
-    }
-
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    fun nextGenerationIfOff() {
-        if(!viewModel.on)
-        {
-            nextGeneration()
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -310,10 +293,10 @@ class MainActivity : AppCompatActivity()
 
     }
 
-    fun saveCurrentMatrix(comment: String)
+    private fun saveCurrentMatrix(comment: String)
     {
         val copy = Array(viewModel.matrix.count) { BooleanArray(viewModel.matrix.count) }
-        for(i in 0..copy.size - 1)
+        for(i in copy.indices)
         {
             copy[i] = viewModel.matrix.matrix[i].toBooleanArray()
         }
@@ -323,7 +306,7 @@ class MainActivity : AppCompatActivity()
         saveMatrixListRecords()
     }
 
-    fun saveMatrixListRecords()
+    private fun saveMatrixListRecords()
     {
         val mPrefs = getPreferences(MODE_PRIVATE)
         val prefsEditor = mPrefs.edit()
@@ -379,15 +362,14 @@ class MainActivity : AppCompatActivity()
     {
 
         val mPrefs = getPreferences(MODE_PRIVATE)
-        val json = mPrefs.getString("SavedObject", "")
-        if (json == null)
+        var json = mPrefs.getString("SavedObject", "")
+        if (json.isNullOrBlank() || json.isEmpty())
         {
             saveMatrixListRecords()
+            json = mPrefs.getString("SavedObject", "")
         }
 
         val itemType = object: TypeToken<MutableList<SaveListItem>>() {}.type
-
-
         viewModel.listOfSaves = Gson().fromJson(json, itemType)
     }
 
@@ -397,7 +379,7 @@ class MainActivity : AppCompatActivity()
         val copy =
                 MutableList(viewModel.listOfSaves[index].matrix.size)
                 { MutableList(viewModel.listOfSaves[index].matrix.size){ false }}
-        for(i in 0..copy.size - 1)
+        for(i in 0 until copy.size)
         {
             copy[i] = viewModel.listOfSaves[index].matrix[i].toMutableList()
         }
