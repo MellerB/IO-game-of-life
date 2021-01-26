@@ -382,7 +382,12 @@ class MainActivity : AppCompatActivity()
         {
             copy[i] = viewModel.matrix.matrix[i].toBooleanArray()
         }
-        val savedData = (SaveListItem(copy, viewModel.matrix.deadRules, viewModel.matrix.aliveRules, comment))
+
+
+        Log.i("saveded",matrixView.myMatrix.deadRules.toString())
+        Log.i("savelive",matrixView.myMatrix.aliveRules.toString())
+
+        val savedData = (SaveListItem(copy, matrixView.myMatrix.deadRules, matrixView.myMatrix.aliveRules, comment))
 
         viewModel.listOfSaves.add(savedData)
         saveMatrixListRecords()
@@ -473,9 +478,11 @@ class MainActivity : AppCompatActivity()
         viewModel.matrix.matrix = copy
         viewModel.matrix.count = viewModel.matrix.matrix.size
         matrixView.myMatrix = viewModel.matrix
-        matrixView.myMatrix.deadRules = viewModel.matrix.deadRules
-        matrixView.myMatrix.aliveRules = viewModel.matrix.aliveRules
 
+        matrixView.myMatrix.deadRules = viewModel.listOfSaves[index].deadRules
+        matrixView.myMatrix.aliveRules = viewModel.listOfSaves[index].aliveRules
+
+        Log.i("ded", matrixView.myMatrix.deadRules.toString())
         matrixView.updateSquareSize()
         matrixView.update()
         var rulesInput = findViewById<EditText>(R.id.rules)
@@ -486,6 +493,9 @@ class MainActivity : AppCompatActivity()
                 )
 
 
+
+        Log.i("loadded",viewModel.matrix.deadRules.toString())
+        Log.i("loadlive",viewModel.matrix.aliveRules.toString())
             }
 
 
