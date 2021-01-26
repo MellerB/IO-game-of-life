@@ -26,8 +26,8 @@ data class Matrix(var count: Int): Parcelable
             Pair(1, 0),
             Pair(1, 1)
     )
-    private val aliveRules = listOf(2, 3)
-    private val deadRules = listOf(3)
+    var aliveRules = listOf(2, 3)
+    var deadRules = listOf(3)
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun changeBoolean(row: Int, column: Int) :Boolean

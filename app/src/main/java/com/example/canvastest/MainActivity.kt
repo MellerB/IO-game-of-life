@@ -6,6 +6,8 @@ import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -15,6 +17,9 @@ import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doAfterTextChanged
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.SavedStateViewModelFactory
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
@@ -39,6 +44,66 @@ class MainActivity : AppCompatActivity()
         matrixView = findViewById(R.id.customView)
         matrixView.myMatrix = viewModel.matrix
         matrixView.updateSquareSize()
+
+        var rulesInput = findViewById<EditText>(R.id.rules)
+        rulesInput.setText(viewModel.matrix.aliveRules.toString().filter { it.isDigit() }
+        +"/"+
+                viewModel.matrix.deadRules.toString().filter { it.isDigit() }
+        )
+
+        rulesInput.addTextChangedListener( object:TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {
+
+
+                var s = rulesInput.selectionStart
+                val regex = Regex("/[1234567890/]+/g;")
+                var clearedText = regex.replace(text!!.toString(), "")
+
+                if ("/" !in clearedText) {
+                    clearedText = "$clearedText/"
+                    s+=1
+                }
+
+                Log.i("CLEARED", clearedText)
+                var t = clearedText.split("/")
+
+                Log.i("t0", t[0].map(Character::getNumericValue).toIntArray().distinct().toString())
+                Log.i("t1", t[1].map(Character::getNumericValue).toIntArray().distinct().toString())
+
+
+                var alive = t[0].map(Character::getNumericValue).toIntArray()
+                var dead = t[1].map(Character::getNumericValue).toIntArray()
+
+                if(alive.distinct().size<alive.size || dead.distinct().size<dead.size)
+                {
+                    s-=1
+                }
+
+                viewModel.matrix.aliveRules = alive.distinct().toList()
+                viewModel.matrix.deadRules = dead.distinct().toList()
+
+
+                rulesInput.removeTextChangedListener(this);
+
+                rulesInput.setText(viewModel.matrix.aliveRules.toString().filter { it.isDigit() }
+                        +"/"+
+                        viewModel.matrix.deadRules.toString().filter { it.isDigit() }
+                )
+
+                rulesInput.addTextChangedListener(this);
+
+                if (s>rulesInput.text.length || s<0)
+                {
+                    s=rulesInput.text.length
+                }
+
+                rulesInput.setSelection(s)
+            }
+        } )
+
 
         val buttonPause = findViewById<FloatingActionButton>(R.id.pause)
         buttonPause.setOnLongClickListener{onPlay()}
@@ -68,6 +133,14 @@ class MainActivity : AppCompatActivity()
 
         val buttonMenuShowHide = findViewById<FloatingActionButton>(R.id.menuHideShow,)
         buttonMenuShowHide.setOnClickListener {
+            Log.i("dedrulez wil be szołn", "REEQEAWWEAMMMMMMMMMMMMMMMMMMMMMMMMMMMMMm")
+            try {
+                var t = rulesInput.text!!.toList().map { it.toInt() }.toTypedArray().toList()
+                viewModel.matrix.deadRules = t
+            } finally {
+                Log.i("DEADRULEZZZZZZ", viewModel.matrix.deadRules.toString())
+            }
+
             loadSavedMatrixListToMenu()
             updateOpenButtonState()
             if(buttonIncreaseMatrixCount.visibility == View.VISIBLE)
@@ -76,6 +149,7 @@ class MainActivity : AppCompatActivity()
                 buttonReduceMatrixCount.visibility = View.GONE
                 buttonSave.visibility = View.GONE
                 buttonOpen.visibility = View.GONE
+                rulesInput.visibility = View.GONE
             }
             else
             {
@@ -83,6 +157,7 @@ class MainActivity : AppCompatActivity()
                 buttonReduceMatrixCount.visibility = View.VISIBLE
                 buttonSave.visibility = View.VISIBLE
                 buttonOpen.visibility = View.VISIBLE
+                rulesInput.visibility = View.VISIBLE
             }
         }
 
@@ -260,18 +335,18 @@ class MainActivity : AppCompatActivity()
     private fun showAddItemDialog(c: Context) {
         val taskEditText = EditText(c)
         val dialog: AlertDialog = AlertDialog.Builder(c)
-            .setTitle("Zapisz jako:")
-            .setView(taskEditText)
-            .setPositiveButton(
-                    "Zapisz",
-            ) { dialog, which ->
-                if(taskEditText.text.toString().isNotEmpty())
-                {
-                    saveCurrentMatrix(taskEditText.text.toString())
-                    updateOpenButtonState()
+                .setTitle("Zapisz jako:")
+                .setView(taskEditText)
+                .setPositiveButton(
+                        "Zapisz",
+                ) { dialog, which ->
+                    if(taskEditText.text.toString().isNotEmpty())
+                    {
+                        saveCurrentMatrix(taskEditText.text.toString())
+                        updateOpenButtonState()
+                    }
                 }
-            }
-            .create()
+                .create()
 
         dialog.show()
 
@@ -293,6 +368,9 @@ class MainActivity : AppCompatActivity()
 
     }
 
+
+
+
     private fun saveCurrentMatrix(comment: String)
     {
         val copy = Array(viewModel.matrix.count) { BooleanArray(viewModel.matrix.count) }
@@ -300,7 +378,7 @@ class MainActivity : AppCompatActivity()
         {
             copy[i] = viewModel.matrix.matrix[i].toBooleanArray()
         }
-        val savedData = (SaveListItem(copy, comment))
+        val savedData = (SaveListItem(copy, viewModel.matrix.deadRules, viewModel.matrix.aliveRules, comment))
 
         viewModel.listOfSaves.add(savedData)
         saveMatrixListRecords()
@@ -357,6 +435,13 @@ class MainActivity : AppCompatActivity()
         posButton.layoutParams = buttonParams
     }
 
+
+
+
+
+
+
+
     @RequiresApi(Build.VERSION_CODES.N)
     fun loadSavedMatrixListToMenu()
     {
@@ -374,22 +459,31 @@ class MainActivity : AppCompatActivity()
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun loadChosenMatrix(index: Int)
-    {
+    fun loadChosenMatrix(index: Int) {
         val copy =
                 MutableList(viewModel.listOfSaves[index].matrix.size)
-                { MutableList(viewModel.listOfSaves[index].matrix.size){ false }}
-        for(i in 0 until copy.size)
-        {
+                { MutableList(viewModel.listOfSaves[index].matrix.size) { false } }
+        for (i in 0 until copy.size) {
             copy[i] = viewModel.listOfSaves[index].matrix[i].toMutableList()
         }
         viewModel.matrix.matrix = copy
         viewModel.matrix.count = viewModel.matrix.matrix.size
         matrixView.myMatrix = viewModel.matrix
+        matrixView.myMatrix.deadRules = viewModel.matrix.deadRules
+        matrixView.myMatrix.aliveRules = viewModel.matrix.aliveRules
 
         matrixView.updateSquareSize()
         matrixView.update()
-    }
+        var rulesInput = findViewById<EditText>(R.id.rules)
+        
+                rulesInput.setText(viewModel.matrix.aliveRules.toString().filter { it.isDigit() }
+                        + "/" +
+                        viewModel.matrix.deadRules.toString().filter { it.isDigit() }
+                )
+
+
+            }
+
 
     private fun removeChoosenMatrix(index: Int)
     {
