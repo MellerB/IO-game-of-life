@@ -45,9 +45,10 @@ class MainActivity : AppCompatActivity()
         matrixView.myMatrix = viewModel.matrix
         matrixView.updateSquareSize()
 
+
         var rulesInput = findViewById<EditText>(R.id.rules)
         rulesInput.setText(viewModel.matrix.aliveRules.toString().filter { it.isDigit() }
-        +"/"+
+                +"/"+
                 viewModel.matrix.deadRules.toString().filter { it.isDigit() }
         )
 
@@ -102,7 +103,12 @@ class MainActivity : AppCompatActivity()
 
                 rulesInput.setSelection(s)
             }
+
+
+
         } )
+
+
 
 
         val buttonPause = findViewById<FloatingActionButton>(R.id.pause)
@@ -133,13 +139,6 @@ class MainActivity : AppCompatActivity()
 
         val buttonMenuShowHide = findViewById<FloatingActionButton>(R.id.menuHideShow,)
         buttonMenuShowHide.setOnClickListener {
-            Log.i("dedrulez wil be szołn", "REEQEAWWEAMMMMMMMMMMMMMMMMMMMMMMMMMMMMMm")
-            try {
-                var t = rulesInput.text!!.toList().map { it.toInt() }.toTypedArray().toList()
-                viewModel.matrix.deadRules = t
-            } finally {
-                Log.i("DEADRULEZZZZZZ", viewModel.matrix.deadRules.toString())
-            }
 
             loadSavedMatrixListToMenu()
             updateOpenButtonState()
@@ -169,6 +168,11 @@ class MainActivity : AppCompatActivity()
             handler.postDelayed(r, viewModel.loopDelay)
         }
         handler.postDelayed(r, 0)
+
+
+        Log.i("alive", viewModel.matrix.aliveRules.toString())
+        Log.i("dead", viewModel.matrix.deadRules.toString())
+
     }
 
 
@@ -475,7 +479,7 @@ class MainActivity : AppCompatActivity()
         matrixView.updateSquareSize()
         matrixView.update()
         var rulesInput = findViewById<EditText>(R.id.rules)
-        
+
                 rulesInput.setText(viewModel.matrix.aliveRules.toString().filter { it.isDigit() }
                         + "/" +
                         viewModel.matrix.deadRules.toString().filter { it.isDigit() }
